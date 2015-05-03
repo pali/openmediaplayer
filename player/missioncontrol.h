@@ -49,6 +49,7 @@ private:
     bool wiredHeadsetIsConnected;
     qint64 headsetPauseStamp;
     QTimer *wirelessResumeTimer;
+    QTimer *callStateTimer;
 
     QString currentArtist;
     QString currentTitle;
@@ -71,6 +72,7 @@ private slots:
     void onBatteryEmpty();
 
     void onCallStateChanged(QDBusMessage msg);
+    void onCallStateResume();
 
     void onWirelessHeadsetConnected();
     void onHeadsetConnected();

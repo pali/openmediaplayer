@@ -25,6 +25,7 @@ MissionControl::MissionControl() :
     wiredHeadsetIsConnected = false;
     headsetPauseStamp = -1;
     wirelessResumeTimer = NULL;
+    callStateTimer = NULL;
 
 }
 
@@ -195,6 +196,12 @@ void MissionControl::onCallStateChanged(QDBusMessage msg)
 {
     QString state = msg.arguments()[0].toString();
 
+    if (callStateTimer) {
+        callStateTimer->stop();
+        callStateTimer->deleteLater();
+        callStateTimer = NULL;
+    }
+
     if (state == "ringing") {
         wasRinging = true;
         pausedByCall = mafwState == Playing;
@@ -205,11 +212,22 @@ void MissionControl::onCallStateChanged(QDBusMessage msg)
         if (pausedByCall) mafwRenderer->pause();
     }
     else if (state == "none") {
-        if (pausedByCall && headsetPauseStamp == -1)
-            mafwRenderer->resume();
+        if (pausedByCall && headsetPauseStamp == -1) {
+            callStateTimer = new QTimer(this);
+            callStateTimer->setSingleShot(true);
+            connect(callStateTimer, SIGNAL(timeout()), this, SLOT(onCallStateResume()));
+            callStateTimer->start(2000);
+        }
         pausedByCall = false;
         wasRinging = false;
     }
+}
+
+void MissionControl::onCallStateResume()
+{
+    callStateTimer->deleteLater();
+    callStateTimer = NULL;
+    mafwRenderer->resume();
 }
 
 void MissionControl::handlePhoneButton()
