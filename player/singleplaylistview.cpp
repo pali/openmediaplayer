@@ -513,7 +513,7 @@ void SinglePlaylistView::onNowPlayingWindowHidden()
 
 void SinglePlaylistView::closeEvent(QCloseEvent *e)
 {
-    if (browsePlaylistId != MAFW_SOURCE_INVALID_BROWSE_ID)
+    if (browsePlaylistId != (uint)MAFW_SOURCE_INVALID_BROWSE_ID)
         mafwTrackerSource->cancelBrowse(browsePlaylistId);
 
     if (playlistModified && currentObjectId.isNull()) {
